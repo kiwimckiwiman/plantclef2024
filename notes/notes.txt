@@ -1,0 +1,59 @@
+1) embedding tsne (embeddings_tsne.py)
+	-> found base model generated embeddings not clustered
+	-> using pretrained classifer generated embeddings gives distinct clusters
+
+2) investigate runtime embed (geneareted from generator) vs pre-generated embed (check_generations.py)
+	-> cosine similarity >0.85 (discrepancy from augmentation e.g., crop + zoom)
+	-> IMPORTANT: discolouration when reading from generator as an array
+		-> FIX: recolor = cv2.cvtColor(patch, cv2.COLOR_BGR2RGB) (line 58)
+		-> convert from BGR to RGB
+
+3) generate embeddings of class AB (generate_AB.py, colab)
+	-> predefined class A: 1355934
+	-> predefined class B: 1356331
+	-> AB will consist of permutations of A and B, merged horizontally or vertically, 100 samples
+	-> no issues generating merged samples
+	-> no issues generating embeddings
+
+4) tsne anaysis of class (A_B_AB_tsne.py)
+)
+	-> A v B
+	-> A v B v AB
+	-> A v B v C v AB
+	-> all 4 classes in own distinct clusters, no sign of overlap
+		-> although werd to not see AB close to or in between A and B, could be due to tsne calculations
+		-> look to cosine or distance metrics
+
+5) generate average embedding per class,verify wih tsne (get_avg_of_class.py)
+	-> no issues
+	-> some sparsity but should be fine (?)
+
+6) generate average embedding for AB (gen_avg_AB.py)
+	-> no issues
+
+7) perform cosine/distance metrics between avg classes and avg AB (cosine_AB_and_all_avg.py)
+	-> cosine similarity score is significant (A v AB and B v AB both around 0.67, next nearest is 0.24)
+	-> euclidean distance is significant (A v AB = 9.94, B v AB = 10.01, next nearest is 14.78)
+
+	('1356331', 0.6728806209593006), ('1355934', 0.6714598905364443), ('1364133', 0.24470450640313846), ('1622901', 0.16192515683829806), ('1363575', 0.1430519495514892)]
+	cosine score for class A (1355934) vs AB 0.6714598905364443
+	cosine score for class B (1356331) vs AB 0.6728806209593006
+	cosine score for class 1364133 vs AB 0.24470450640313846
+	========================================================
+	('1355934', 9.940054616448004), ('1356331', 10.005289105555216), ('1364133', 14.781730498606436), ('1397299', 15.780806875049267), ('1360143', 15.8164735419328)]
+	euclidean score for class A (1355934) vs AB 9.940054616448004
+	euclidean score for class B (1356331) vs AB 10.005289105555216
+	euclidean score for class 1364133 vs AB 14.781730498606436
+
+8) train MLP on pre-generated classes (MLP_run_training)
+	-> doing proper batch-wise
+		-> load entire dataset
+		-> split into train/test/val
+		-> further split train/test into batches
+		-> back prop/optim every batch
+	-> 60 classes, 100 embeds per class, 50 epochs => 100% acc for traintest, 0.2<= train/test loss
+	
+9) test MLP on single class (MLP_run_training, line 162)
+	-> 0.99 val acc 
+10) test MLP on multi class (MLP_run_training, line 211)
+	->100% acc top_5/top_2 for AB pred

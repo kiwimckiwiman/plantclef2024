@@ -1,0 +1,22 @@
+feature extractors:
+	-> vit
+		-> patch-wise extraction
+		-> whole image extraction
+	-> CNN
+		-> patch-wise extraction
+		-> whole image extraction
+
+distance-based evaluation (dictionary made from vit pretrained)
+	-> euclidean
+	-> cosine
+
+regression-based evaluation (dictionary made from vit pretrained)
+	-> SVM
+	-> Logistic regression
+
+MLP-classification-based evaluation
+	-> trained on individual embeddings
+	-> trained on runtime merged embeddings
+
+threshold calculations
+	->maybe save top 10 accuracies for further analysis later

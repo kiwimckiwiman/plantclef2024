@@ -1,0 +1,67 @@
+data generation/preparation
+---------------------------
+- use pretrained vit to generate embeddings for each training and testing class
+
+
+training
+--------
+- train mlp using embeddings
+	-labels converted to onehot
+	-3 layers 786 -> 1024 -> 7806
+	-0.05 lr
+	-cross entropy
+	-100 epochs
+	-128 batch size
+
+inference
+---------
+1) split image into 64 patches 
+	2) on each image use vit to extract embedding
+	3) predict using mlp
+	4) sort probabilities and predicted indices
+	5) apply softmax to probabilities
+	6) take top 1000 <-----  hyper param
+	7) calculate variance of probabilities
+	8) get absolute log value of variance, store in array
+	9) store predictions in array
+	10) keep note of unique classes accross all 64 patches
+
+BMA
+---
+11) find the highest log variance (a)
+12) for each log variance:
+	13) calculate sqrt((a - log var)/a) <----- likelihood
+	14) store into array 
+15) calculate total sum of likelihoods
+16) calculate weighted BMA:
+	17) for each prediction (9):
+		18) prediction[i] * likelihood (14) / sum (15)
+		19) store class, BMA score into array
+	20) put BMA predictions (19) into array
+21) for each unique class (10):
+	22) for each weighted BMA (20):
+		23) if unique class is same as weighted BMA:
+			24) keep running count for class
+		25) add total probability for class to array
+
+threshold
+---------
+26) sort final BMA probabilities (25)
+27) calculate z score for array (26)
+28) if z score > 2: <-----  hyper param
+	29) keep class in array
+30) format result with image name, final result array (29)
+31) put formatted result (31) into array
+
+finalise
+--------
+32) repeat (1-31) for all images
+33) export to csv (31)
+
+parallelisation
+---------------
+1a) take image set (1695)
+2a) split into 5 groups
+3a) write script to launch 5 scripts (1-33) on each group
+4a) combine 5 output results (3a) to one 
+5a) submit (4a)

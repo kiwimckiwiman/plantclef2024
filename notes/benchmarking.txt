@@ -1,0 +1,17 @@
+for all: save all predictions in order
+
+1) vit on whole image
+2) vit on patched image (4)
+	->save per/patch prediction for each image
+3) vit on patched image (16)
+	-> save per/patch prediction for each image
+4) cnn on whole image
+5?) cnn on patched image (4) (if 2>3)
+	->save per/patch prediction for each image
+5?) vit on patched image (16) (if 3>2)
+	-> save per/patch prediction for each image
+6) embedding based whole image
+7) embedding based patched image (4)
+	-> if individual % > x?
+8) embedding based patched image (16)
+	-> if individual % > x?
